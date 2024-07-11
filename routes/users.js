@@ -71,6 +71,7 @@ const express = require("express");
 const router = express.Router();
 
 const users = require("../data/users");
+const posts = require("../data/posts");
 const error = require("../utilities/error");
 
 router
@@ -120,6 +121,11 @@ router
         rel: "",
         type: "DELETE",
       },
+      {
+        href: `/${req.params.id}/posts`,
+        rel: "posts",
+        type: "GET"
+      }
     ];
 
     if (user) res.json({ user, links });
@@ -149,5 +155,16 @@ router
     if (user) res.json(user);
     else next();
   });
+
+router
+    .route("/:id/posts")
+    .get((req, res, next) => {
+        const userPosts = posts.filter((p)=> {
+            return p.userId == req.params.id
+        });
+
+        if (userPosts) res.json(userPosts);
+        else next();
+  })
 
 module.exports = router;
