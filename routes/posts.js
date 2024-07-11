@@ -71,7 +71,7 @@ const error = require("../utilities/error");
 
 router
   .route("/")
-  .get((req, res) => {
+  .get((req, res, next) => {
     const links = [
       {
         href: "posts/:id",
@@ -80,9 +80,25 @@ router
       },
     ];
 
-    res.json({ posts, links });
+    const userID = req.query["userId"];
+
+    if (!userID){
+        res.json({ posts, links });
+    }else {
+        //Check if userID is associated with any posts and return those posts
+        //If not, return a resource error not found
+        const userPosts = posts.filter((p) => {
+            return p.userId == userID;
+        });
+
+        if (userPosts) res.json(userPosts);
+        else next(error(404, "userId not found"));
+    }
+
   })
   .post((req, res, next) => {
+
+
     if (req.body.userId && req.body.title && req.body.content) {
       const post = {
         id: posts[posts.length - 1].id + 1,
